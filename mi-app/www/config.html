@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuraciones</title>
+    <link rel="stylesheet" href="css/config.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script>
+        // Al cargar la página, aplica las configuraciones guardadas
+        document.addEventListener('DOMContentLoaded', () => {
+            applySavedSettings();
+        });
+
+        function applySavedSettings() {
+            // Aplicar tema
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.body.setAttribute('data-theme', savedTheme);
+                document.getElementById('theme-select').value = savedTheme;
+            }
+
+            // Activar o desactivar notificaciones
+            const notificationsEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+            document.getElementById('notifications-toggle').checked = notificationsEnabled;
+
+            // Cambiar idioma
+            const savedLanguage = localStorage.getItem('language');
+            if (savedLanguage) {
+                document.getElementById('language-select').value = savedLanguage;
+                setLanguageText(savedLanguage);
+            }
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById("theme-select").value;
+            document.body.setAttribute("data-theme", theme);
+            localStorage.setItem('theme', theme); // Guardar tema seleccionado en localStorage
+        }
+
+        function toggleNotifications() {
+            const notificationsEnabled = document.getElementById("notifications-toggle").checked;
+            localStorage.setItem('notificationsEnabled', notificationsEnabled); // Guardar el estado de las notificaciones
+            alert(notificationsEnabled ? "Notificaciones activadas." : "Notificaciones desactivadas.");
+        }
+
+        function changeLanguage() {
+            const language = document.getElementById("language-select").value;
+            localStorage.setItem('language', language); // Guardar idioma seleccionado en localStorage
+            setLanguageText(language);
+        }
+
+        function setLanguageText(language) {
+            const languageNames = {
+                es: 'Español',
+                en: 'Inglés',
+                fr: 'Francés'
+            };
+            alert(`Idioma cambiado a ${languageNames[language]}`);
+        }
+    </script>
+</head>
+<body>
+
+    <div class="header">
+        <span class="material-icons back-icon" onclick="window.location.href='calendario.html'">arrow_back</span>
+        <span class="title-text">Configuraciones</span>
+    </div>
+
+    <div class="config-container">
+        <h2>Opciones de Configuración</h2>
+
+        <!-- Sección de Configuraciones de Tema -->
+        <div class="config-section">
+            <h3>Tema</h3>
+            <label for="theme-select">Selecciona un tema:</label>
+            <select id="theme-select" onchange="changeTheme()">
+                <option value="light">Claro</option>
+                <option value="dark">Oscuro</option>
+                <option value="system">Por defecto del sistema</option>
+            </select>
+        </div>
+
+        <!-- Sección de Notificaciones -->
+        <div class="config-section">
+            <h3>Notificaciones</h3>
+            <label for="notifications-toggle">Activar notificaciones:</label>
+            <input type="checkbox" id="notifications-toggle" onchange="toggleNotifications()">
+        </div>
+
+        <!-- Sección de Idioma -->
+        <div class="config-section">
+            <h3>Idioma</h3>
+            <label for="language-select">Selecciona el idioma:</label>
+            <select id="language-select" onchange="changeLanguage()">
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+                <option value="fr">Francés</option>
+            </select>
+        </div>
+    </div>
+
+</body>
+</html>

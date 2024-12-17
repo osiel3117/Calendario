@@ -1,0 +1,284 @@
+/* Estilo general */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e2f;
+    color: #eaeaea;
+    line-height: 1.6;
+    user-select: none;
+
+}
+
+input, textarea {
+    user-select: text;
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #2196f3;
+    color: white;
+    padding: 15px 20px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header .title {
+    flex-grow: 1;
+    text-align: center;
+    font-weight: 500;
+    font-size: 20px;
+    margin: 0;
+}
+
+.header .icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Contenedor de contenido */
+.content-container {
+    padding: 20px;
+}
+
+/* Estilo del título de la cita */
+.title-section h1 {
+    font-size: 26px;
+    color: #ffffff;
+    background-color: #2196f3;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 0 0 15px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.paciente-info {
+    color: #a4a4b1;
+    margin-top: 8px;
+    font-size: 14px;
+    text-align: left;
+    font-style: italic;
+}
+
+/* Sección de fecha y hora */
+.datetime-section p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1e1e2f;
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Detalles de la cita */
+.details-section p {
+    font-size: 16px;
+    margin: 15px 0;
+    color: #cfd8dc;
+    background-color: #2b2b3b;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.details-section p strong {
+    color: #ffffff;
+}
+
+/* Popup de edición */
+.popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #333;
+    padding: 25px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    color: #f5f5f5;
+    z-index: 1001;
+    max-width: 350px;
+    width: 80%;
+    text-align: center;
+}
+
+.popup h2 {
+    margin-top: 0;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.popup label {
+    display: block;
+    margin-top: 15px;
+    color: #ffffff;
+    font-size: 14px;
+    text-align: left;
+}
+
+.popup input, .popup select {
+    margin-top: 8px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #444;
+    color: #fff;
+    font-size: 14px;
+}
+
+.popup button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.popup button:hover {
+    background-color: #1976d2;
+}
+
+/* Efectos de transición */
+.popup,
+.header,
+.datetime-section p,
+.details-section p,
+.title-section h1 {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Estilo para botones/iconos */
+.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.icon:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .header .title {
+        font-size: 18px;
+    }
+
+    .title-section h1 {
+        font-size: 22px;
+    }
+
+    .datetime-section p {
+        font-size: 16px;
+    }
+
+    .details-section p {
+        font-size: 14px;
+    }
+}
+
+.message {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+}
+
+.message.show {
+    display: block;
+    animation: fadeInOut 3s;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+    }
+    10%, 90% {
+        opacity: 1;
+    }
+}
+
+.title-section {
+    text-align: left;
+}
+
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* Quitar el cuadro azul en los íconos específicos */
+button, .icon-button, .material-icons {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}
+
+button:focus, .icon-button:focus, .material-icons:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}

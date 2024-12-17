@@ -1,0 +1,185 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+
+}
+
+input, textarea {
+    user-select: text;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+}
+
+.back-icon, .add-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+h2 {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0;
+}
+
+.agenda-list {
+    padding: 10px 20px;
+}
+
+.cita-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 10px;
+    background-color: white;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cita-date {
+    text-align: center;
+    margin-right: 15px;
+    font-size: 12px;
+}
+
+.date-day {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.date-weekday {
+    font-size: 14px;
+    color: #95a5a6;
+}
+
+.cita-details {
+    flex-grow: 1;
+}
+
+.cita-details h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #007bff;
+}
+
+.cita-details p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.cita-details span {
+    display: block;
+    font-size: 12px;
+    color: #95a5a6;
+}
+
+.cita-icon {
+    margin-left: auto;
+    color: #777;
+}
+
+.cita-icon .material-icons {
+    font-size: 20px;
+}
+
+        /* Estilo del contenedor de búsqueda */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        /* Estilo del campo de búsqueda */
+        #search-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #search-input:focus {
+            border-color: #007BFF;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+        }
+
+/* Quitar el cuadro azul en los íconos específicos */
+button, .icon-button, .material-icons {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}
+
+button:focus, .icon-button:focus, .material-icons:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}
+
+/* Estilo para el spinner de carga */
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* Asegurar que quede por encima de otros elementos */
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente */
+    color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Animación opcional (spinner circular) */
+.spinner::after {
+    content: '';
+    display: inline-block;
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+    border: 3px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Animación giratoria */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

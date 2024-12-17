@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacientes</title>
+    <link rel="stylesheet" href="css/pacientes.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+    <!-- Encabezado con el botón de regreso y el título -->
+    <div class="header">
+        <a href="calendario.html" class="icon-button">
+            <span class="material-icons">arrow_back</span>
+        </a>
+        <span class="title">Pacientes</span>
+        <button onclick="mostrarPopupAgregar()" class="icon-button">
+            <span class="material-icons">add</span>
+        </button>
+    </div>
+
+    <!-- Notificación -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Mensaje de confirmación -->
+    <div id="confirmation-message" class="confirmation-message" style="display: none;">
+        <p>¿Seguro que deseas eliminar este paciente?</p>
+        <button id="confirm-delete-btn" class="confirm-btn">Eliminar</button>
+        <button id="cancel-delete-btn" class="cancel-btn">Cancelar</button>
+    </div>
+
+    <!-- Contenedor para la lista de pacientes -->
+    <div class="container">
+        <div id="no-pacientes-message" class="no-pacientes">No hay pacientes aún.</div>
+        <ul id="pacientes-list"></ul>
+    </div>
+
+    <!-- Popup para agregar/editar paciente -->
+    <div class="popup" id="popup-paciente">
+        <div class="popup-content">
+            <button class="close-btn" onclick="cerrarPopup()">×</button>
+            <h3 id="popup-title">Agregar Paciente</h3>
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre del paciente">
+            
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" placeholder="Número de teléfono">
+            
+            <label for="correo">Correo</label>
+            <input type="email" id="correo" placeholder="Correo electrónico">
+            
+            <button type="submit" onclick="guardarPaciente()">Guardar</button>
+        </div>
+    </div>
+
+    <script>
+        let deletePatientId = null; // ID del paciente a eliminar
+
+        async function fetchPacientes() {
+            try {
+                const response = await fetch('/api/pacientes');
+                const pacientes = await response.json();
+                renderPacientes(pacientes);
+            } catch (error) {
+                console.error('Error al obtener los pacientes:', error);
+                showNotification('Error al obtener los pacientes', true);
+            }
+        }
+
+        function renderPacientes(pacientes) {
+            const pacientesList = document.getElementById('pacientes-list');
+            const noPacientesMessage = document.getElementById('no-pacientes-message');
+
+            pacientesList.innerHTML = ''; // Limpiar la lista
+
+            if (pacientes.length === 0) {
+                noPacientesMessage.style.display = 'block';
+            } else {
+                noPacientesMessage.style.display = 'none';
+                pacientes.forEach(paciente => {
+                    const pacienteItem = document.createElement('li');
+                    pacienteItem.className = 'paciente-item';
+                    pacienteItem.innerHTML = `
+                        <strong>Nombre:</strong> ${paciente.nombre} <br>
+                        <strong>Teléfono:</strong> ${paciente.telefono || 'No disponible'} <br>
+                        <strong>Correo:</strong> ${paciente.correo || 'No disponible'} <br>
+                        <strong>Número de Sesiones:</strong> ${paciente.numSesiones || 0} <br>
+                        <button onclick="mostrarPopupEditar('${paciente._id}', '${paciente.nombre}', '${paciente.telefono}', '${paciente.correo}')">Editar</button>
+                        <button onclick="confirmDeletePaciente('${paciente._id}')">Eliminar</button>
+                    `;
+                    pacientesList.appendChild(pacienteItem);
+                });
+            }
+        }
+
+        function confirmDeletePaciente(id) {
+            deletePatientId = id; // Guardar el ID del paciente a eliminar
+            const confirmationMessage = document.getElementById('confirmation-message');
+            confirmationMessage.style.display = 'block';
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+            try {
+                await fetch(`/api/pacientes/${deletePatientId}`, { method: 'DELETE' });
+                showNotification('Paciente eliminado exitosamente');
+                fetchPacientes(); // Actualizar la lista
+            } catch (error) {
+                console.error('Error al eliminar el paciente:', error);
+                showNotification('Error al eliminar el paciente', true);
+            } finally {
+                closeConfirmationMessage();
+            }
+        });
+
+        document.getElementById('cancel-delete-btn').addEventListener('click', closeConfirmationMessage);
+
+        function closeConfirmationMessage() {
+            const confirmationMessage = document.getElementById('confirmation-message');
+            confirmationMessage.style.display = 'none';
+            deletePatientId = null;
+        }
+
+        function mostrarPopupAgregar() {
+            document.getElementById('popup-title').textContent = 'Agregar Paciente';
+            document.getElementById('nombre').value = '';
+            document.getElementById('telefono').value = '';
+            document.getElementById('correo').value = '';
+            document.getElementById('popup-paciente').style.display = 'block';
+        }
+
+        function mostrarPopupEditar(id, nombre, telefono, correo) {
+            document.getElementById('popup-title').textContent = 'Editar Paciente';
+
+            // Asegurar valores válidos para nombre, telefono y correo
+            document.getElementById('nombre').value = nombre || '';
+            document.getElementById('telefono').value = (telefono && telefono !== 'undefined') ? telefono : '';
+            document.getElementById('correo').value = (correo && correo !== 'undefined') ? correo : '';
+
+            // Guardar el ID del paciente en el atributo dataset
+            document.getElementById('popup-paciente').dataset.id = id;
+            document.getElementById('popup-paciente').style.display = 'block';
+        }
+
+
+
+        function cerrarPopup() {
+            document.getElementById('popup-paciente').style.display = 'none';
+        }
+
+        async function guardarPaciente() {
+            const id = document.getElementById('popup-paciente').dataset.id;
+            const nombre = document.getElementById('nombre').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const correo = document.getElementById('correo').value.trim();
+
+            if (!nombre) {
+                showNotification('El nombre es obligatorio', true);
+                return;
+            }
+
+            const body = { nombre };
+            if (telefono) body.telefono = telefono; // Solo agregar si no está vacío
+            if (correo) body.correo = correo; // Solo agregar si no está vacío
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/pacientes/${id}` : '/api/pacientes';
+
+
+            
+            try {
+                await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                showNotification(`Paciente ${id ? 'actualizado' : 'creado'} exitosamente`);
+                cerrarPopup();
+                fetchPacientes();
+            } catch (error) {
+                console.error(`Error al ${id ? 'actualizar' : 'crear'} el paciente:`, error);
+                showNotification(`Error al ${id ? 'actualizar' : 'crear'} el paciente`, true);
+            }
+        }
+
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${isError ? 'error' : ''}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000); // Ocultar después de 3 segundos
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchPacientes(); // Cargar pacientes al iniciar
+        });
+    </script>
+</body>
+</html>

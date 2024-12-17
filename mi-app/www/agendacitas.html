@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Citas</title>
+    <link rel="stylesheet" href="css/agendacitas.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+    <div id="loading-spinner" class="spinner" style="display: none;">Cargando...</div>
+
+    <div class="header">
+        <span class="material-icons back-icon" onclick="window.history.back()">arrow_back</span>
+        <h2>Agenda de Citas</h2>
+        <span class="material-icons add-icon" onclick="window.location.href='/agendar.html'">add</span>
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Buscar citas por nombre...">
+    </div>
+
+    <div id="agenda-list" class="agenda-list">
+        <!-- Las citas se cargarán aquí -->
+    </div>
+    
+
+
+    <script>
+ document.addEventListener('DOMContentLoaded', function() {
+    let citasData = []; // Guardaremos las citas aquí para filtrar
+    const spinner = document.getElementById('loading-spinner'); // Seleccionar el spinner
+
+    // Mostrar el spinner mientras se cargan los datos
+    spinner.style.display = 'block';
+
+    // Cargar las citas desde el backend
+    fetch('https://calendario-yhe1.onrender.com/api/citas')
+        .then(response => response.json())
+        .then(data => {
+            citasData = data.sort((a, b) => new Date(a.start) - new Date(b.start)); // Ordenar por fecha
+            renderCitas(citasData); // Renderizar las citas inicialmente
+            spinner.style.display = 'none'; // Ocultar el spinner después de cargar los datos
+        })
+        .catch(error => {
+            console.error('Error al cargar citas:', error);
+            document.getElementById('agenda-list').innerHTML = '<p class="error-message">Error al cargar las citas. Por favor, intenta de nuevo más tarde.</p>';
+            spinner.style.display = 'none'; // Ocultar el spinner en caso de error
+        });
+
+    // Función para renderizar las citas
+    function renderCitas(citas) {
+        const agendaList = document.getElementById('agenda-list');
+        agendaList.innerHTML = ''; // Limpiar contenido previo
+
+        citas.forEach(cita => {
+            const citaElement = document.createElement('div');
+            citaElement.classList.add('cita-item');
+            citaElement.onclick = () => {
+                window.location.href = `/cita.html?id=${cita.id}`; // Redirigir al hacer clic
+            };
+
+            const startTime = new Date(cita.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const endTime = new Date(cita.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const date = new Date(cita.start).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', weekday: 'long' });
+
+            citaElement.innerHTML = `
+                <div class="cita-date">
+                    <span class="date-day">${date.split(',')[1]}</span>
+                    <span class="date-weekday">${date.split(',')[0].toUpperCase()}</span>
+                </div>
+                <div class="cita-details">
+                    <h4>${cita.title}</h4>
+                    <p>${startTime} - ${endTime}</p>
+                </div>
+                <div class="cita-icon">
+                    <span class="material-icons">alarm</span>
+                </div>
+            `;
+            agendaList.appendChild(citaElement);
+        });
+    }
+
+    // Filtro dinámico al escribir en la barra de búsqueda
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filteredCitas = citasData.filter(cita =>
+            cita.title.toLowerCase().includes(searchTerm) ||
+            (cita.motivo && cita.motivo.toLowerCase().includes(searchTerm))
+        );
+        renderCitas(filteredCitas); // Renderizar las citas filtradas
+    });
+});
+
+    </script>
+</body>
+</html>

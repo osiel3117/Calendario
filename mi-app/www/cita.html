@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de la Cita</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="css/cita.css">
+</head>
+<body>
+
+    <div class="header">
+        <span class="material-icons back-icon" onclick="window.history.back()">arrow_back</span>
+        <span class="title">Detalles de la Cita</span>
+        <span class="material-icons edit-icon" onclick="mostrarFormularioEdicion()">edit</span>
+        <span class="material-icons delete-icon" onclick="eliminarCita()">delete</span>
+        <span class="material-icons share-icon" onclick="enviarPorWhatsApp()">share</span>
+    </div>
+
+<div id="spinner" class="spinner" style="display: none;"></div>
+
+
+<div class="content-container">
+    <div class="title-section">
+        <h1 id="cita-title">Título de la Cita</h1>
+        <p id="cita-paciente" class="paciente-info">Nombre del Paciente</p>
+    </div>
+    
+    <div class="datetime-section">
+        <p id="cita-fecha"><strong>Fecha y Hora de la Cita</strong></p>
+    </div>
+    
+    <div class="details-section">
+        <p><strong>Motivo:</strong> <span id="cita-motivo">Motivo de la Cita</span></p>
+        <p><strong>Tipo de sesión:</strong> <span id="cita-tipoSesion">Tipo de Sesión</span></p>
+        <p><strong>Número de sesiones:</strong> <span id="cita-numSesiones">Número de Sesiones</span></p>
+    </div>
+</div>
+
+<!-- Formulario de edición de cita -->
+<div id="editar-cita-form" class="popup" style="display:none;">
+    <h2>Editar Cita</h2>
+    <label for="edit-title">Título:</label>
+    <input type="text" id="edit-title">
+    <label for="edit-start">Fecha y hora de inicio:</label>
+    <input type="datetime-local" id="edit-start">
+    <label for="edit-end">Fecha y hora de fin:</label>
+    <input type="datetime-local" id="edit-end">
+    <label for="edit-motivo">Motivo:</label>
+    <input type="text" id="edit-motivo">
+    <label for="edit-tipoSesion">Tipo de sesión:</label>
+    <select id="edit-tipoSesion">
+        <option value="individual">Individual</option>
+        <option value="pareja">Pareja</option>
+        <option value="familiar">Familiar</option>
+    </select>
+    <button onclick="guardarEdicionCita()">Guardar Cambios</button>
+</div>
+
+<!-- Contenedor para mensajes -->
+<div id="message" class="message"></div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const citaId = params.get('id');
+    let citaDetalles = {}; // Almacena los detalles de la cita para reutilizar en WhatsApp
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (citaId) {
+            fetch(`/api/citas/${citaId}`)
+                .then(response => response.json())
+                .then(cita => {
+                    citaDetalles = cita; // Guardar los detalles para WhatsApp
+                    document.getElementById('cita-title').textContent = cita.title;
+                    document.getElementById('cita-paciente').textContent = cita.paciente.nombre;
+                    document.getElementById('cita-fecha').textContent = `${new Date(cita.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})} - ${new Date(cita.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}, ${new Date(cita.start).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}`;
+                    document.getElementById('cita-motivo').textContent = cita.motivo;
+                    document.getElementById('cita-tipoSesion').textContent = cita.tipoSesion;
+                    document.getElementById('cita-numSesiones').textContent = cita.numSesiones;
+                })
+                .catch(() => mostrarMensaje('No se pudieron cargar los detalles de la cita.', 'error'));
+        } else {
+            mostrarMensaje('No se encontró un ID de cita en la URL.', 'error');
+        }
+    });
+
+    function mostrarFormularioEdicion() {
+        document.getElementById('editar-cita-form').style.display = 'block';
+        fetch(`/api/citas/${citaId}`)
+            .then(response => response.json())
+            .then(cita => {
+                document.getElementById('edit-title').value = cita.title;
+                document.getElementById('edit-start').value = cita.start.slice(0, -1);
+                document.getElementById('edit-end').value = cita.end.slice(0, -1);
+                document.getElementById('edit-motivo').value = cita.motivo;
+                document.getElementById('edit-tipoSesion').value = cita.tipoSesion;
+            });
+    }
+
+    function guardarEdicionCita() {
+    const start = new Date(document.getElementById('edit-start').value);
+    const end = new Date(document.getElementById('edit-end').value);
+
+    if (isNaN(start) || isNaN(end) || start >= end) {
+        mostrarMensaje('La fecha de inicio debe ser anterior a la fecha de fin.', 'error');
+        return;
+    }
+
+    // Continuar con la lógica de edición
+    fetch(`/api/citas/${citaId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: document.getElementById('edit-title').value,
+            start: document.getElementById('edit-start').value,
+            end: document.getElementById('edit-end').value,
+            motivo: document.getElementById('edit-motivo').value,
+            tipoSesion: document.getElementById('edit-tipoSesion').value
+        })
+    })
+    .then(response => response.json())
+    .then(() => {
+        mostrarMensaje('Cita actualizada exitosamente', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+    })
+    .catch(() => mostrarMensaje('Hubo un error al actualizar la cita.', 'error'));
+}
+
+
+    function eliminarCita() {
+        if (confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+            fetch(`/api/citas/${citaId}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        mostrarMensaje('Cita eliminada exitosamente', 'success');
+                        setTimeout(() => window.location.href = '/calendario.html', 1500);
+                    } else {
+                        mostrarMensaje('Hubo un error al eliminar la cita.', 'error');
+                    }
+                })
+                .catch(() => mostrarMensaje('Hubo un error al eliminar la cita.', 'error'));
+        }
+    }
+
+    function enviarPorWhatsApp() {
+        if (!citaDetalles) return;
+
+        const fecha = new Date(citaDetalles.start).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const horaInicio = new Date(citaDetalles.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const horaFin = new Date(citaDetalles.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const nombrePaciente = citaDetalles.paciente.nombre || "Paciente desconocido";
+
+        // Estructura del mensaje sin motivo
+        const mensaje = `*Datos de la Cita*\n` +
+                        `Fecha: ${fecha}\n` +
+                        `Horario: ${horaInicio} - ${horaFin}\n` +
+                        `Paciente: ${nombrePaciente}`;
+
+        // URL codificada para WhatsApp
+        const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank'); // Abrir en nueva pestaña
+    }
+
+    function mostrarMensaje(mensaje, tipo) {
+        const messageBox = document.getElementById('message');
+        messageBox.textContent = mensaje;
+        messageBox.className = `message show ${tipo}`;
+        setTimeout(() => {
+            messageBox.className = 'message';
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>

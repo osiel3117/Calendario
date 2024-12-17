@@ -1,0 +1,295 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Cita</title>
+    <link rel="stylesheet" href="css/agendar.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+    <!-- Encabezado -->
+    <div class="header">
+        <a href="calendario.html" class="icon-button">
+            <span class="material-icons">arrow_back</span>
+            <span>Regresar</span>
+        </a>
+    </div>
+
+    <div id="loading-spinner" class="spinner" style="display: none;">Cargando...</div>
+
+
+<div class="container">
+    <h1>Agendar Cita</h1>
+
+    <div id="message" class="message"></div>
+
+    <form id="agendar-form">
+        <label for="title">Nombre:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="paciente">Paciente:</label>
+        <select id="paciente" name="paciente" required>
+            <option value="" disabled selected>Seleccionar</option>
+        </select>
+        <button id="nuevo-paciente-btn" type="button">Registrar Nuevo Paciente</button>
+
+        <div class="numSesionesContainer">
+            <label for="numSesiones">Número de sesiones:</label>
+            <span id="numSesiones" class="numSesionesDisplay">0</span>
+        </div>
+        
+        <label for="start">Fecha y hora de inicio:</label>
+        <input type="datetime-local" id="start" name="start" required>
+
+        <label for="end">Fecha y hora de fin:</label>
+        <input type="datetime-local" id="end" name="end" required>
+
+        <label for="motivo">Motivo:</label>
+        <textarea id="motivo" name="motivo" rows="2" oninput="ajustarAltura(this)"></textarea>
+
+        <label for="tipoSesion">Tipo de sesión:</label>
+        <select id="tipoSesion" name="tipoSesion" required>
+            <option value="individual">Individual</option>
+            <option value="pareja">Pareja</option>
+            <option value="familiar">Familiar</option>
+        </select>
+
+        <button type="submit">Agendar</button>
+    </form>
+</div>
+
+<!-- Modal para registrar un nuevo paciente -->
+<div id="nuevo-paciente-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-modal">&times;</span>
+        <h2>Registrar Paciente</h2>
+        <form id="modal-paciente-form">
+            <label for="modal-nombre">Nombre:</label>
+            <input type="text" id="modal-nombre" required>
+
+            <label for="modal-telefono">Teléfono:</label>
+            <input type="tel" id="modal-telefono" pattern="[0-9]{10}" title="Debe tener 10 dígitos">
+
+            <label for="modal-correo">Correo Electrónico:</label>
+            <input type="email" id="modal-correo">
+
+            <button type="submit">Registrar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messageDiv = document.getElementById('message');
+    const params = new URLSearchParams(window.location.search);
+    const fechaSeleccionada = params.get('fecha'); // Obtener el parámetro 'fecha' de la URL
+
+    if (fechaSeleccionada) {
+        // Formatear la fecha para el campo datetime-local
+        const fechaFormateada = `${fechaSeleccionada}T08:00`; // Hora por defecto: 08:00 AM
+        document.getElementById('start').value = fechaFormateada;
+
+        // Ajustar automáticamente la hora de fin (incrementar 1 hora)
+        const startTime = new Date(fechaFormateada);
+        startTime.setHours(startTime.getHours() + 1);
+        const year = startTime.getFullYear();
+        const month = String(startTime.getMonth() + 1).padStart(2, '0');
+        const day = String(startTime.getDate()).padStart(2, '0');
+        const hours = String(startTime.getHours()).padStart(2, '0');
+        const minutes = String(startTime.getMinutes()).padStart(2, '0');
+        document.getElementById('end').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+
+
+    function showErrorMessage(message) {
+        messageDiv.textContent = message;
+        messageDiv.className = 'message error';
+        messageDiv.style.display = 'block';
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Configuración inicial de pacientes y sesiones
+    fetch('/api/pacientes')
+    .then(response => response.json())
+    .then(data => {
+        const pacienteSelect = document.getElementById('paciente');
+
+        // Ordenar pacientes alfabéticamente por nombre
+        data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+        // Agregar pacientes al select
+        data.forEach(paciente => {
+            const option = document.createElement('option');
+            option.value = paciente._id;
+            option.textContent = `${paciente.nombre} - Tel: ${paciente.telefono}`;
+            option.dataset.numSesiones = paciente.numSesiones || 0;
+            pacienteSelect.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Error al obtener pacientes:', error);
+    });
+
+
+        document.getElementById('paciente').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const numSesionesActuales = parseInt(selectedOption.dataset.numSesiones) || 0;
+
+            // Actualizar el número de sesiones
+            document.getElementById('numSesiones').textContent = numSesionesActuales;
+
+            // Actualizar el nombre de la cita con el nombre del paciente seleccionado
+            const nombrePaciente = selectedOption.textContent.split(' - ')[0]; // Extrae el nombre del paciente
+            document.getElementById('title').value = nombrePaciente;
+        });
+
+
+    // Mostrar modal para nuevo paciente
+    document.getElementById('nuevo-paciente-btn').onclick = function() {
+        document.getElementById('nuevo-paciente-modal').style.display = 'block';
+    };
+
+    // Cerrar modal para nuevo paciente
+    document.getElementById('close-modal').onclick = function() {
+        document.getElementById('nuevo-paciente-modal').style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('nuevo-paciente-modal')) {
+            document.getElementById('nuevo-paciente-modal').style.display = 'none';
+        }
+    };
+
+    // Registrar nuevo paciente
+    const spinner = document.getElementById('loading-spinner');
+
+    document.getElementById('modal-paciente-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    spinner.style.display = 'block'; // Mostrar spinner
+
+    // Crear el objeto del paciente
+    const paciente = {
+        nombre: document.getElementById('modal-nombre').value.trim(),
+    };
+
+    const telefono = document.getElementById('modal-telefono').value.trim();
+    const correo = document.getElementById('modal-correo').value.trim();
+
+    if (telefono) paciente.telefono = telefono;
+    if (correo) paciente.correo = correo;
+
+    fetch('/api/pacientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paciente)
+    })
+    .then(response => response.json())
+    .then(data => {
+        spinner.style.display = 'none'; // Ocultar spinner
+        if (data.error) {
+            showErrorMessage(data.error);
+        } else {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        spinner.style.display = 'none'; // Ocultar spinner
+        console.error('Error:', error);
+        showErrorMessage('Hubo un error al registrar el paciente');
+    });
+});
+
+
+
+    // Ajustar automáticamente la hora de fin
+    document.getElementById('start').addEventListener('input', function() {
+    const startTime = new Date(this.value); // Obtener la fecha y hora de inicio
+    if (!isNaN(startTime.getTime())) {
+        startTime.setHours(startTime.getHours() + 1); // Incrementar una hora
+        const endInput = document.getElementById('end');
+
+        // Formatear la fecha y hora local para el campo datetime-local
+        const year = startTime.getFullYear();
+        const month = String(startTime.getMonth() + 1).padStart(2, '0');
+        const date = String(startTime.getDate()).padStart(2, '0');
+        const hours = String(startTime.getHours()).padStart(2, '0');
+        const minutes = String(startTime.getMinutes()).padStart(2, '0');
+
+        // Asignar el valor formateado al campo de hora de fin
+        endInput.value = `${year}-${month}-${date}T${hours}:${minutes}`;
+    }
+});
+
+
+    // Agendar cita
+    document.getElementById('agendar-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const title = document.getElementById('title').value.trim();
+    const paciente = document.getElementById('paciente').value;
+    const start = new Date(document.getElementById('start').value);
+    const end = new Date(document.getElementById('end').value);
+
+    if (!title) {
+        showErrorMessage('El nombre de la cita es obligatorio');
+        return;
+    }
+
+    if (!paciente) {
+        showErrorMessage('Debes seleccionar un paciente');
+        return;
+    }
+
+    if (isNaN(start) || isNaN(end) || start >= end) {
+        showErrorMessage('La fecha de inicio debe ser anterior a la fecha de fin');
+        return;
+    }
+
+
+
+        const cita = {
+            title: document.getElementById('title').value,
+            paciente: document.getElementById('paciente').value,
+            start: document.getElementById('start').value,
+            end: document.getElementById('end').value,
+            motivo: document.getElementById('motivo').value || null,
+            tipoSesion: document.getElementById('tipoSesion').value,
+            numSesiones: parseInt(document.getElementById('numSesiones').textContent, 10)
+        };
+
+        fetch('/api/citas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cita)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al agendar la cita');
+            }
+            return response.json();
+        })
+        .then(data => {
+            window.location.href = '/calendario.html';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('Hubo un error al agendar la cita');
+        });
+    });
+});
+
+// Función para ajustar altura de textarea
+function ajustarAltura(elemento) {
+    elemento.style.height = "auto";
+    elemento.style.height = (elemento.scrollHeight) + "px";
+}
+
+</script>
+
+</body>
+</html>

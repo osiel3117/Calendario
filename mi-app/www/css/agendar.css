@@ -1,0 +1,353 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e3f2fd; /* Fondo azul claro */
+    margin: 0;
+    padding: 0;
+    user-select: none;
+
+}
+
+input, textarea {
+    user-select: text;
+}
+
+.container {
+    width: 80%;
+    max-width: 400px;
+    margin: 20px auto;
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #1976d2; /* Azul oscuro */
+    font-size: 22px;
+}
+
+label {
+    display: block;
+    width: 100%;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #1976d2; /* Azul oscuro */
+    font-size: 14px;
+    text-align: left;
+}
+
+input, textarea, select {
+    width: 93%;
+    max-width: 350px;
+    padding: 8px;
+    margin: 0 auto 10px;
+    display: block;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+textarea {
+    overflow: hidden;
+    resize: none;
+    min-height: 40px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #1976d2; /* Azul oscuro */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #1565c0; /* Azul un poco más oscuro */
+}
+
+/* Botón de "Registrar Nuevo Paciente" */
+#nuevo-paciente-btn {
+    background-color: #1e88e5; /* Azul intermedio */
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+#nuevo-paciente-btn:hover {
+    background-color: #1565c0;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    font-size: 16px;
+    color: #1976d2;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 10px;
+}
+
+.back-button:hover {
+    color: #1565c0;
+}
+
+.back-button .material-icons {
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 15px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 400px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover, .close:focus {
+    color: black;
+}
+
+/* Estilos para el modal */
+.modal { 
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.4); 
+}
+
+.modal-content { 
+    background-color: #fefefe; 
+    margin: 15% auto; 
+    padding: 20px; 
+    border: 1px solid #888; 
+    width: 80%; 
+    max-width: 400px; 
+    border-radius: 20px;
+}
+
+.close { 
+    color: #aaa; 
+    float: right; 
+    font-size: 28px; 
+    font-weight: bold; 
+    cursor: pointer; 
+}
+
+.close:hover, .close:focus { 
+    color: black; 
+}
+
+/* Estilos para inputs de fecha y hora */
+input[type="datetime-local"] {
+    width: 93%;
+    max-width: 350px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.numSesionesContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.numSesionesContainer label {
+    margin-right: 8px;
+    font-weight: bold;
+    color: #1976d2;
+    font-size: 14px;
+}
+
+.numSesionesDisplay {
+    padding: 4px 8px;
+    font-size: 14px;
+    color: #333;
+    background-color: #e0f7fa; /* Azul claro */
+    border-radius: 5px;
+}
+
+/* Estilos para el pop-up de citas */
+.day-popup {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+    width: 280px;
+    z-index: 10;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.day-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.day-popup-header .material-icons {
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #90caf9; /* Azul claro */
+}
+
+.day-popup-event {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.day-popup-event .event-time {
+    color: #90caf9;
+    margin-right: 10px;
+}
+
+.day-popup-event .event-title {
+    color: white;
+}
+
+.selected-day {
+    background-color: black !important;
+    color: white;
+}
+
+/* Estilos del header con color azul */
+.header {
+    display: flex;
+    align-items: center;
+    background-color: #1976d2; /* Azul oscuro */
+    color: white;
+    padding: 10px;
+}
+
+.icon-button {
+    color: white;
+    font-size: 24px;
+    text-decoration: none;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.icon-button span {
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+.message {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    display: none;
+    z-index: 1000;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    display: none; /* Por defecto está oculto */
+}
+
+/* Estilo para el spinner de carga */
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* Asegurar que quede por encima de otros elementos */
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente */
+    color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Animación opcional (spinner circular) */
+.spinner::after {
+    content: '';
+    display: inline-block;
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+    border: 3px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Animación giratoria */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Quitar el cuadro azul en los íconos específicos */
+button, .icon-button, .material-icons {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}
+
+button:focus, .icon-button:focus, .material-icons:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}

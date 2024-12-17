@@ -1,0 +1,283 @@
+/* Asegúrate de que html y body ocupen toda la altura */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+}
+
+input, textarea {
+    user-select: text;
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+}
+
+.header .title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.header .icon-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+
+.icon-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.icon-button .material-icons {
+    font-size: 24px;
+}
+
+.title {
+    font-weight: bold;
+}
+
+/* Contenedor de pacientes */
+
+#pacientes-list {
+    list-style-type: none; /* Quita las viñetas de la lista */
+    padding: 0; /* Quita el espaciado de la lista */
+    margin: 0;
+}
+
+
+.container {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.paciente-item {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.paciente-item strong {
+    font-weight: bold;
+}
+
+.paciente-item button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.paciente-item button:first-of-type {
+    background-color: #e0e0e0;
+    color: #333;
+    margin-right: 5px;
+}
+
+.paciente-item button:last-of-type {
+    background-color: #d9534f;
+    color: white;
+}
+
+/* Popup */
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    z-index: 1000;
+    width: 80%;
+    max-width: 400px;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.popup-content label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.popup-content input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    background: none;
+    border: none;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.popup-content button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-content button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para el mensaje de "No hay pacientes aún" */
+.no-pacientes {
+    text-align: center;
+    font-size: 18px;
+    color: #555;
+    margin-top: 20px;
+    display: none; /* Oculto por defecto */
+}
+
+.notification {
+    position: fixed;
+    top: 60px; /* Ajusta según la altura de tu header */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4caf50; /* Verde para éxito */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    display: none; /* Ocultar por defecto */
+    z-index: 1000; /* Para asegurar que esté encima */
+}
+
+.notification.error {
+    background-color: #f44336; /* Rojo para errores */
+}
+
+/* Estilo para la notificación */
+.notification {
+    position: fixed;
+    top: 70px; /* Debajo del header */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    display: none; /* Oculta la notificación por defecto */
+    z-index: 1000;
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
+/* Estilo para el mensaje de confirmación */
+.confirmation-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    width: 85%;
+    max-width: 300px;
+    padding: 15px;
+    z-index: 1000;
+    text-align: center;
+}
+
+.confirmation-message p {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Botones dentro del mensaje de confirmación */
+.confirm-btn, .cancel-btn {
+    padding: 8px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.confirm-btn {
+    background-color: #f44336; /* Rojo */
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #d32f2f;
+}
+
+.cancel-btn {
+    background-color: #ccc;
+    color: #333;
+}
+
+.cancel-btn:hover {
+    background-color: #b0b0b0;
+}
+
+/* Quitar el cuadro azul en los íconos específicos */
+
+button, .icon-button, .material-icons {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}
+
+button:focus, .icon-button:focus, .material-icons:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Para Safari */
+    -webkit-tap-highlight-color: transparent; /* Elimina el color de toque en Chrome y Safari */
+
+}

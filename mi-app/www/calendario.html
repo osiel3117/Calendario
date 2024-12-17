@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.9/index.global.min.css">
+    <link rel="stylesheet" href="css/calendario.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.2/build/global/luxon.min.js"></script>
+</head>
+<body>
+
+    <div id="sidebar" class="sidebar">
+        <ul class="sidebar-menu">
+            <li onclick="cambiarVista('dayGridMonth')">Mes</li>
+            <li onclick="cambiarVista('dayGridWeek')">Semana</li>
+            <li onclick="cambiarVista('dayGridDay')">Día</li>
+            <li onclick="window.location.href='agendacitas.html'"><span class="menu-title">Agenda</span></li>
+            <li onclick="window.location.href='pacientes.html'"><span class="menu-title">Pacientes</span></li>
+            <hr>
+            <li onclick="window.location.href='config.html'"><span class="material-icons">settings</span> <span>Configuración</span></li>
+        </ul>
+    </div>
+
+    <div class="header">
+        <div id="default-header" class="header-content">
+            <span class="material-icons menu-icon" onclick="toggleMenu()">menu</span>
+            <span class="month-text" id="monthText">diciembre de 2024</span>
+            <span class="material-icons today-icon" onclick="goToToday()">calendar_today</span>
+            <span class="material-icons more-icon" onclick="toggleOptionsMenu()">more_vert</span>
+        </div>
+    
+        <div id="color-header" class="header-content hidden">
+            <span class="material-icons back-icon" onclick="closeColorHeader()">arrow_back</span>
+            <span class="color-text">Toca para colorear</span>
+            <input type="color" id="header-day-color" value="#ff0000">
+        </div>
+    </div>
+    
+    <div id="calendar-container">
+        <div id="calendar"></div>
+    </div>
+    
+    <div id="options-menu" class="options-menu">
+        <div onclick="showGoToPopup()">Ir a</div>
+        <div onclick="showColorHeader()">Colorear días</div>
+    </div>
+    
+    <div class="floating-btn" onclick="window.location.href='agendar.html'">
+        <span class="material-icons">add</span>
+    </div>
+    
+    
+    <div id="goto-popup" class="popup">
+        <span class="popup-close" onclick="closePopup('goto-popup')">&times;</span>
+        <h2>Ir a</h2>
+        <label for="year-select">Año:</label>
+        <input type="number" id="year-select" min="1900" max="2100" value="2024">
+        <label for="month-select">Mes:</label>
+        <select id="month-select">
+            <option value="0">Enero</option>
+            <option value="1">Febrero</option>
+            <option value="2">Marzo</option>
+            <option value="3">Abril</option>
+            <option value="4">Mayo</option>
+            <option value="5">Junio</option>
+            <option value="6">Julio</option>
+            <option value="7">Agosto</option>
+            <option value="8">Septiembre</option>
+            <option value="9">Octubre</option>
+            <option value="10">Noviembre</option>
+            <option value="11">Diciembre</option>
+        </select>
+        <button onclick="goToSelectedDate()">Ir</button>
+    </div>
+    
+    
+    <div id="day-popup" class="day-popup" style="display: none;">
+        <div class="day-popup-header">
+            <span id="popup-title">0 CITAS</span>
+            <div class="popup-controls">
+                <span class="material-icons add-icon" onclick="redirigirAgendar()">add</span>
+                <span class="material-icons close-icon">close</span>
+            </div>
+        </div>
+        <ul id="popup-event-list"></ul>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    const optionsMenu = document.getElementById('options-menu');
+    const sidebar = document.getElementById('sidebar');
+    const dayPopup = document.getElementById('day-popup');
+    const popupEventList = document.getElementById('popup-event-list');
+    let colorMode = false;
+    let selectedColor = '#ff0000';
+    let citas = [];
+    let coloredDays = JSON.parse(localStorage.getItem('coloredDays')) || {};
+    let selectedDayEl = null;
+    let selectedDate = null;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        headerToolbar: false,  
+        dayMaxEventRows: true, // Permitir filas máximas visibles
+      
+        
+        dateClick: function(info) {
+
+            const clickedDate = new Date(info.date.setHours(0, 0, 0, 0));
+            const currentMonth = calendar.getDate().getMonth();
+            const clickedMonth = clickedDate.getMonth();
+
+            if (clickedMonth !== currentMonth) {
+                calendar.gotoDate(clickedDate);
+                setTimeout(() => {
+                    const citasForDay = citas.filter(cita => isSameDay(new Date(cita.start), clickedDate));
+                    selectedDate = clickedDate;
+                    const updatedDayEl = document.querySelector(`.fc-day[data-date="${info.dateStr}"]`);
+                    showDayPopup(citasForDay, updatedDayEl);
+                }, );
+            } else if (colorMode) {
+                selectedColor = document.getElementById('header-day-color').value;
+                toggleDayColor(info.dateStr);
+            } else {
+                const citasForDay = citas.filter(cita => isSameDay(new Date(cita.start), clickedDate));
+                selectedDate = clickedDate;
+                showDayPopup(citasForDay, info.dayEl);
+            }
+        },
+        eventClick: function(info) {
+            const citaId = info.event.id;
+            window.location.href = `/cita.html?id=${citaId}`;
+        },
+        eventDisplay: 'block',
+        eventContent: function(arg) {
+            let titleEl = document.createElement('div');
+            titleEl.classList.add('fc-event-title');
+            titleEl.innerText = arg.event.title;
+
+            let backgroundEl = document.createElement('div');
+            backgroundEl.classList.add('custom-event-background');
+            backgroundEl.appendChild(titleEl);
+
+            return { domNodes: [backgroundEl] };
+        },
+        datesSet: function() {
+            const calendarContainer = document.getElementById('calendar-container');
+            calendarContainer.style.transition = 'transform 0.5s ease-in-out';
+            calendarContainer.style.transform = 'translateY(50px)';
+            setTimeout(() => {
+                calendarContainer.style.transform = 'translateY(0)';
+            }, 80);
+        },
+    });
+
+    calendar.render();
+
+    function isSameDay(date1, date2) {
+        return (
+            date1.getDate() === date2.getDate() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getFullYear() === date2.getFullYear()
+        );
+    }
+
+function showDayPopup(citasForDay, dayElement) {
+    if (selectedDayEl) selectedDayEl.classList.remove('selected-day');
+    selectedDayEl = dayElement;
+    selectedDayEl.classList.add('selected-day');
+
+    // Guardar la fecha seleccionada en formato YYYY-MM-DD
+    selectedDate = dayElement.getAttribute('data-date');
+    console.log("Fecha seleccionada: ", selectedDate);
+
+    const dayRect = dayElement.getBoundingClientRect();
+    const isNearBottom = dayRect.bottom + dayPopup.offsetHeight > window.innerHeight;
+
+    dayPopup.style.display = 'block';
+
+    if (isNearBottom) {
+        dayPopup.style.top = `${dayRect.top + window.scrollY - dayPopup.offsetHeight - 5}px`;
+    } else {
+        dayPopup.style.top = `${dayRect.bottom + window.scrollY + 5}px`;
+    }
+
+    dayPopup.style.left = `${Math.min(dayRect.left + window.scrollX, window.innerWidth - dayPopup.offsetWidth - 10)}px`;
+
+    document.getElementById('popup-title').textContent = `${citasForDay.length} CITA${citasForDay.length !== 1 ? 'S' : ''}`;
+
+    popupEventList.innerHTML = '';
+    if (citasForDay.length > 0) {
+        citasForDay.forEach(cita => {
+            const li = document.createElement('li');
+            li.className = 'day-popup-event';
+            li.innerHTML = `
+                <span class="event-time">${new Date(cita.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <span class="event-title">${cita.title}</span>`;
+            li.onclick = () => window.location.href = `/cita.html?id=${cita.id}`;
+            popupEventList.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.textContent = 'No hay citas para este día';
+        popupEventList.appendChild(li);
+    }
+
+    // Agregar funcionalidad al botón "+" del popup
+    const addButton = document.querySelector('.add-icon');
+    if (addButton) {
+        addButton.onclick = () => redirigirAgendar();
+    }
+}
+
+// Función para redirigir a agendar.html con la fecha seleccionada
+function redirigirAgendar() {
+    if (selectedDate) {
+        // Redirigir a agendar.html con la fecha seleccionada como parámetro
+        window.location.href = `agendar.html?fecha=${selectedDate}`;
+    } else {
+        alert("No se seleccionó ninguna fecha.");
+    }
+}
+
+
+    function closeDayPopup() {
+    const dayPopup = document.getElementById('day-popup');
+    if (dayPopup) {
+        dayPopup.style.display = 'none'; // Ocultar el popup
+    }
+    if (selectedDayEl) {
+        selectedDayEl.classList.remove('selected-day'); // Quitar la clase seleccionada
+    }
+    selectedDayEl = null; // Reiniciar la referencia al día seleccionado
+    selectedDate = null; // Reiniciar la fecha seleccionada
+    popupOpen = false; // Marcar que el popup está cerrado
+}
+
+
+    document.querySelector('.close-icon').addEventListener('click', closeDayPopup);
+
+    function toggleDayColor(dateStr) {
+        const dayElement = document.querySelector(`.fc-day[data-date="${dateStr}"]`);
+        if (coloredDays[dateStr]) {
+            delete coloredDays[dateStr];
+            dayElement.style.backgroundColor = '';
+        } else {
+            coloredDays[dateStr] = selectedColor;
+            dayElement.style.backgroundColor = selectedColor;
+        }
+        localStorage.setItem('coloredDays', JSON.stringify(coloredDays));
+    }
+
+    function applySavedColors() {
+        const allDays = calendarEl.querySelectorAll('.fc-daygrid-day');
+        allDays.forEach(dayEl => {
+            const dateStr = dayEl.getAttribute('data-date');
+            if (coloredDays[dateStr]) {
+                dayEl.style.backgroundColor = coloredDays[dateStr];
+            }
+        });
+    }
+
+    applySavedColors();
+
+    fetch('/api/citas')
+        .then(response => response.json())
+        .then(data => {
+            citas = data;
+            calendar.addEventSource(data);
+        })
+        .catch(error => console.error('Error al cargar citas:', error));
+
+    function updateMonthText() {
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const currentDate = calendar.getDate();
+        document.getElementById('monthText').innerText = `${monthNames[currentDate.getMonth()]} de ${currentDate.getFullYear()}`;
+    }
+
+    calendar.on('datesSet', () => {
+        updateMonthText();
+        applySavedColors();
+    });
+
+    updateMonthText();
+
+    window.cambiarVista = function(vista) {
+        if (vista === 'year') {
+            calendar.changeView('dayGridMonth');
+            calendar.setOption('visibleRange', {
+                start: `${new Date().getFullYear()}-01-01`,
+                end: `${new Date().getFullYear()}-12-31`
+            });
+            document.getElementById('monthText').innerText = `Año ${new Date().getFullYear()}`;
+        } else {
+            calendar.changeView(vista);
+            calendar.setOption('visibleRange', null);
+            updateMonthText();
+        }
+        sidebar.classList.remove('active');
+    };
+
+    window.showColorHeader = function() {
+        document.getElementById('default-header').classList.add('hidden');
+        document.getElementById('color-header').classList.remove('hidden');
+        colorMode = true;
+    };
+
+    window.closeColorHeader = function() {
+        document.getElementById('default-header').classList.remove('hidden');
+        document.getElementById('color-header').classList.add('hidden');
+        colorMode = false;
+    };
+
+    window.toggleMenu = function() {
+        sidebar.classList.toggle('active');
+    };
+
+    window.toggleOptionsMenu = function() {
+        optionsMenu.style.display = optionsMenu.style.display === 'block' ? 'none' : 'block';
+    };
+
+    window.goToToday = function() {
+        calendar.today();
+        updateMonthText();
+    };
+
+// Función para mostrar el pop-up de "Ir a"
+window.showGoToPopup = function() {
+    document.getElementById('goto-popup').style.display = 'block';
+    optionsMenu.style.display = 'none';
+};
+
+// Función para ir a la fecha seleccionada
+window.goToSelectedDate = function() {
+    const year = document.getElementById('year-select').value; // Obtener el año seleccionado
+    const month = document.getElementById('month-select').value; // Obtener el mes seleccionado
+    calendar.gotoDate(new Date(year, month, 1)); // Ir al primer día del mes y año seleccionados
+    closePopup('goto-popup'); // Cerrar el pop-up
+};
+
+// Función para cerrar el pop-up
+window.closePopup = function(popupId) {
+    document.getElementById(popupId).style.display = 'none';
+};
+
+    let touchstartX = 0;
+    let touchendX = 0;
+
+    calendarEl.addEventListener('touchstart', function(event) {
+        touchstartX = event.changedTouches[0].screenX;
+    });
+
+    calendarEl.addEventListener('touchend', function(event) {
+        touchendX = event.changedTouches[0].screenX;
+        handleGesture();
+    });
+
+    let touchstartY = 0;
+let touchendY = 0;
+
+calendarEl.addEventListener('touchstart', function(event) {
+    touchstartY = event.changedTouches[0].screenY;
+});
+
+calendarEl.addEventListener('touchend', function(event) {
+    touchendY = event.changedTouches[0].screenY;
+    handleVerticalGesture();
+});
+
+function handleVerticalGesture() {
+    if (touchendY < touchstartY - 50) {
+        // Deslizar hacia arriba - Mes siguiente
+        calendar.next();
+    }
+    if (touchendY > touchstartY + 50) {
+        // Deslizar hacia abajo - Mes anterior
+        calendar.prev();
+    }
+    updateMonthText(); // Actualizar el texto del mes
+    setTimeout(applySavedColors, 100); // Aplicar colores guardados después de cambiar el mes
+}
+
+
+    let touchDebounce = false;
+
+    function handleGesture() {
+        if (touchDebounce) return;
+        touchDebounce = true;
+
+        if (touchendX < touchstartX) {
+            calendar.next();
+        }
+        if (touchendX > touchstartX) {
+            calendar.prev();
+        }
+        updateMonthText();
+        setTimeout(applySavedColors, 100);
+
+        setTimeout(() => touchDebounce = false, 300);
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!sidebar.contains(event.target) && !event.target.classList.contains('menu-icon')) {
+            sidebar.classList.remove('active');
+        }
+        if (!optionsMenu.contains(event.target) && !event.target.classList.contains('more-icon')) {
+            optionsMenu.style.display = 'none';
+        }
+    });
+
+});
+
+
+    </script>
+</body>
+</html>

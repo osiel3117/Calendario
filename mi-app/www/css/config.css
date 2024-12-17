@@ -1,0 +1,146 @@
+/* Configuración general de la página */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.header .back-icon {
+    font-size: 28px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.header .title-text {
+    font-weight: bold;
+}
+
+/* Contenedor principal de configuración */
+.config-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    flex-grow: 1;
+    box-sizing: border-box;
+}
+
+/* Títulos de secciones */
+.config-container h2 {
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.config-section h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Estilo de secciones individuales */
+.config-section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.config-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.config-section select, .config-section input[type="checkbox"], .config-section button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #333;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.config-section select:focus, .config-section button:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.config-section button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.config-section button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo del mensaje de usuario */
+#username-display {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 600px) {
+    .header {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    .header .back-icon {
+        font-size: 24px;
+    }
+
+    .config-container {
+        padding: 10px;
+    }
+
+    .config-container h2 {
+        font-size: 20px;
+    }
+
+    .config-section h3 {
+        font-size: 16px;
+    }
+
+    .config-section label {
+        font-size: 14px;
+    }
+
+    .config-section {
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    .config-section select, .config-section input[type="checkbox"], .config-section button {
+        padding: 8px;
+        font-size: 14px;
+    }
+}
